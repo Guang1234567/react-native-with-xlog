@@ -22,7 +22,7 @@ LOCAL_CFLAGS += -fexceptions -frtti
 LOCAL_LDLIBS += -landroid
 
 # The dynamic libraries (.so files) that this module depends on.
-LOCAL_SHARED_LIBRARIES := libfolly_json libfb libjsc libglog_init libyoga
+LOCAL_SHARED_LIBRARIES := libfolly_json libfb libjsc libglog_init libyoga xlog stlport
 
 # The static libraries (.a files) that this module depends on.
 LOCAL_STATIC_LIBRARIES := libreactnative
@@ -59,6 +59,7 @@ $(call import-module,yogajni)
 $(call import-module,cxxreact)
 $(call import-module,jsi)
 $(call import-module,jsiexecutor)
+$(call import-module,xlog)
 
 # TODO(ramanpreet):
 #   Why doesn't this import-module call generate a jscexecutor.so file?

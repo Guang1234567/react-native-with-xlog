@@ -158,7 +158,7 @@ task downloadJSCHeaders(type: Download) {
 }
 
 // Create Android.mk library module based on so files from mvn + include headers fetched from webkit.org
-task prepareJSC(dependsOn: dependenciesPath ? [] : [downloadJSCHeaders]) << {
+task prepareJSC(dependsOn: dependenciesPath ? [] : [downloadJSCHeaders]) doLast {
     copy {
         from zipTree(configurations.compile.fileCollection { dep -> dep.name == 'android-jsc' }.singleFile)
         from dependenciesPath ? "$dependenciesPath/jsc-headers" : {downloadJSCHeaders.dest}
@@ -166,6 +166,14 @@ task prepareJSC(dependsOn: dependenciesPath ? [] : [downloadJSCHeaders]) << {
         include 'jni/**/*.so', '*.h', 'Android.mk'
         filesMatching('*.h', { fname -> fname.path = "JavaScriptCore/${fname.path}"})
         into "$thirdPartyNdkDir/jsc";
+    }
+}
+
+task prepareXlog(type: Copy) {
+    copy {
+        from 'src/main/jni/third-party/xlog'
+        into "$thirdPartyNdkDir/xlog"
+        include '**/*';
     }
 }
 
@@ -230,7 +238,7 @@ def getNdkBuildFullPath() {
     return ndkBuildFullPath
 }
 
-task buildReactNdkLib(dependsOn: [prepareJSC, prepareBoost, prepareDoubleConversion, prepareFolly, prepareGlog], type: Exec) {
+task buildReactNdkLib(dependsOn: [prepareJSC, prepareBoost, prepareDoubleConversion, prepareFolly, prepareGlog, prepareXlog], type: Exec) {
     inputs.file('src/main/jni/react')
     outputs.dir("$buildDir/react-ndk/all")
     commandLine getNdkBuildFullPath(),
@@ -310,6 +318,8 @@ android {
     packagingOptions {
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/LICENSE'
+        exclude 'lib/x86/libmarsxlog.so'
+        exclude 'lib/x86/libstlport_shared.so'
     }
 }
 
@@ -324,6 +334,7 @@ dependencies {
     api "com.squareup.okhttp3:okhttp:${OKHTTP_VERSION}"
     api "com.squareup.okhttp3:okhttp-urlconnection:${OKHTTP_VERSION}"
     api 'com.squareup.okio:okio:1.14.0'
+    api 'com.tencent.mars:mars-xlog:1.0.6'
     compile 'org.webkit:android-jsc:r174650'
 
     testImplementation "junit:junit:${JUNIT_VERSION}"
