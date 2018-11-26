@@ -16,7 +16,7 @@ void reactAndroidLoggingHook(
     const std::string& message,
     android_LogPriority logLevel) {
 
-  //FBLOG_PRI(logLevel, "ReactNativeJS", "%s", message.c_str());
+  FBLOG_PRI(logLevel, "ReactNativeJS", "%s", message.c_str());
 
   __android_log_print(logLevel, "ReactNativeJS", "%s", message.c_str());
 }
