@@ -169,6 +169,15 @@ task prepareJSC(dependsOn: dependenciesPath ? [] : [downloadJSCHeaders]) << {
     }
 }
 
+task prepareXlog(type: Copy) {
+    copy {
+        from 'src/main/jni/third-party/xlog'
+        from zipTree(file('../third-party-android-libs/mars-xlog-1.0.6/mars-xlog-1.0.6.aar'))
+        include 'jni/**/*', '*.h', 'Android.mk'
+        into "$thirdPartyNdkDir/xlog";
+    }
+}
+
 task downloadNdkBuildDependencies {
   if (!boostPath) {
     dependsOn downloadBoost
@@ -230,7 +239,7 @@ def getNdkBuildFullPath() {
     return ndkBuildFullPath
 }
 
-task buildReactNdkLib(dependsOn: [prepareJSC, prepareBoost, prepareDoubleConversion, prepareFolly, prepareGlog], type: Exec) {
+task buildReactNdkLib(dependsOn: [prepareJSC, prepareBoost, prepareDoubleConversion, prepareFolly, prepareGlog, prepareXlog], type: Exec) {
     inputs.file('src/main/jni/react')
     outputs.dir("$buildDir/react-ndk/all")
     commandLine getNdkBuildFullPath(),
@@ -310,6 +319,12 @@ android {
     packagingOptions {
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/LICENSE'
+        exclude 'lib/armeabi/libmarsxlog.so'
+        exclude 'lib/armeabi-v7a/libmarsxlog.so'
+        exclude 'lib/arm64-v8a/libmarsxlog.so'
+        exclude 'lib/x86/libmarsxlog.so'
+        exclude 'lib/x86_64/libmarsxlog.so'
+
     }
 }
 
@@ -325,6 +340,8 @@ dependencies {
     api "com.squareup.okhttp3:okhttp-urlconnection:${OKHTTP_VERSION}"
     api 'com.squareup.okio:okio:1.14.0'
     compile 'org.webkit:android-jsc:r174650'
+    //api 'com.tencent.mars:mars-xlog:1.0.6'
+    api project(':mars-xlog-1.0.6')
 
     testImplementation "junit:junit:${JUNIT_VERSION}"
     testImplementation "org.powermock:powermock-api-mockito:${POWERMOCK_VERSION}"
